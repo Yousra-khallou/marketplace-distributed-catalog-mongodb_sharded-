@@ -1,0 +1,144 @@
+version: '3.8'
+
+services:
+
+  # -----------------------
+  # Config Servers (rsConfig)
+  # -----------------------
+  configsvr1:
+    image: mongo:6.0
+    container_name: configsvr1
+    command: mongod --configsvr --replSet rsConfig --port 27017 --bind_ip_all
+    ports:
+      - 27031:27017
+
+  configsvr2:
+    image: mongo:6.0
+    container_name: configsvr2
+    command: mongod --configsvr --replSet rsConfig --port 27017 --bind_ip_all
+    ports:
+      - 27032:27017
+
+  configsvr3:
+    image: mongo:6.0
+    container_name: configsvr3
+    command: mongod --configsvr --replSet rsConfig --port 27017 --bind_ip_all
+    ports:
+      - 27033:27017
+
+  # -----------------------
+  # Shard 1 (rsShard1)
+  # -----------------------
+  shard1a:
+    image: mongo:6.0
+    container_name: shard1a
+    command: mongod --shardsvr --replSet rsShard1 --port 27017 --bind_ip_all
+    ports:
+      - 27041:27017
+
+  shard1b:
+    image: mongo:6.0
+    container_name: shard1b
+    command: mongod --shardsvr --replSet rsShard1 --port 27017 --bind_ip_all
+
+  shard1c:
+    image: mongo:6.0
+    container_name: shard1c
+    command: mongod --shardsvr --replSet rsShard1 --port 27017 --bind_ip_all
+
+  # -----------------------
+  # Shard 2 (rsShard2)
+  # -----------------------
+  shard2a:
+    image: mongo:6.0
+    container_name: shard2a
+    command: mongod --shardsvr --replSet rsShard2 --port 27017 --bind_ip_all
+    ports:
+      - 27051:27017
+
+  shard2b:
+    image: mongo:6.0
+    container_name: shard2b
+    command: mongod --shardsvr --replSet rsShard2 --port 27017 --bind_ip_all
+
+  shard2c:
+    image: mongo:6.0
+    container_name: shard2c
+    command: mongod --shardsvr --replSet rsShard2 --port 27017 --bind_ip_all
+
+  # -----------------------
+  # Router Mongos
+  # -----------------------
+  mongos:
+    image: mongo:6.0
+    container_name: mongos
+    depends_on:
+      - configsvr1
+      - configsvr2
+      - configsvr3
+      - shard1a
+      - shard1b
+      - shard1c
+      - shard2a
+      - shard2b
+      - shard2c
+    command: mongos --configdb rsConfig/configsvr1:27017,configsvr2:27017,configsvr3:27017 --bind_ip_all
+    ports:
+      - 27025:27017
+    # healthcheck utile pour attendre que mongos soit prêt (optionnel)
+    healthcheck:
+      test: ["CMD", "mongo", "--host", "localhost", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  # -----------------------
+  # RabbitMQ
+  # -----------------------
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - 5672:5672
+      - 15672:15672
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+
+  # -----------------------
+  # Producer (envoie vers RabbitMQ)
+  # -----------------------
+  producer:
+    build:
+      context: ./producer
+    container_name: producer
+    depends_on:
+      - rabbitmq
+    environment:
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: "5672"
+    command: ["python", "producerdummy.py"]
+    volumes:
+      - ./producer:/app
+    restart: unless-stopped
+
+  # -----------------------
+  # Consumer (consomme RabbitMQ -> insert via mongos)
+  # -----------------------
+  consumer:
+    build:
+      context: ./consumer
+    container_name: consumer
+    depends_on:
+      - rabbitmq
+      - mongos
+    environment:
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: "5672"
+      MONGOS_HOST: mongos
+      MONGOS_PORT: "27017"
+      MONGO_DB: marketplace
+    command: ["python", "consumer_worker.py"]
+    volumes:
+      - ./consumer:/app
+    restart: unless-stopped
