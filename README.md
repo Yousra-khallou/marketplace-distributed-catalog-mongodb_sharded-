@@ -1,85 +1,67 @@
-🛒 Marketplace Distributed Catalog — MongoDB Sharded
+# 🛒 Marketplace Distributed Catalog — MongoDB Sharded
 
-Ce projet implémente un catalogue distribué pour une marketplace basé sur MongoDB Sharding, avec une architecture orientée Data Engineering intégrant des producers/consumers pour l’ingestion et le traitement des données produits à grande échelle.
+Ce projet met en place un **catalogue distribué pour une marketplace** basé sur
+**MongoDB Sharding**, en suivant une approche **Data Engineering & Big Data**.
 
-Il s’inscrit dans une logique Big Data & scalabilité horizontale, adaptée aux plateformes e-commerce manipulant de gros volumes de données.
+Il combine un **pipeline Producer / Consumer** pour l’ingestion des données et
+un **cluster MongoDB sharded** pour assurer la scalabilité horizontale.
 
-🚀 Objectifs du projet
+---
 
-Mettre en place un cluster MongoDB sharded
+## 🚀 Objectifs du projet
 
-Distribuer les données produits sur plusieurs shards
+- Implémenter un **cluster MongoDB sharded**
+- Distribuer les données produits sur plusieurs shards
+- Mettre en place un **pipeline Producer / Consumer**
+- Analyser et visualiser les données d’une marketplace
+- Appliquer des concepts clés du **Data Engineering**
 
-Simuler un pipeline de données via des producteurs et consommateurs
+---
 
-Analyser et visualiser les données d’une marketplace
+## 🧠 Technologies utilisées
 
-Appliquer des concepts clés de Data Engineering
+- MongoDB (Sharding)
+- Docker & Docker Compose
+- Python
+- Architecture Producer / Consumer
+- Datasets e-commerce (Olist)
 
-🧠 Technologies utilisées
+---
 
-MongoDB (Sharding)
+## 🏗️ Architecture du projet
 
-Docker & Docker Compose
+Le système est composé de deux parties principales :
+1. Un **pipeline de données** (Producer / Consumer)
+2. Un **cluster MongoDB sharded** pour le stockage distribué
 
-Python
+### Architecture globale
 
-Architecture Producer / Consumer
+```text
+                 CSV Datasets
+        (products, orders, prices)
+                        |
+                    Producer
+                        |
+                Consumer Worker
+                        |
+                 MongoDB Router
+                      (mongos)
+                        |
+        ┌───────────────┼───────────────┐
+        |               |               |
+     Shard 1          Shard 2          Shard 3
+   (Replica Set)   (Replica Set)   (Replica Set)
 
-Datasets e-commerce (Olist)
+Explication
 
-🏗️ Architecture globale
-        CSV Datasets
-             |
-         Producer
-             |
-      MongoDB Router (mongos)
-             |
-   ┌─────────┼─────────┐
-   |         |         |
- Shard 1   Shard 2   Shard 3
+Producer : lit les fichiers CSV et envoie les données.
 
+Consumer : traite les données et les insère dans MongoDB.
 
-Producer : ingestion et envoi des données produits
+mongos : route les requêtes vers le bon shard.
 
-Consumer : traitement et insertion dans MongoDB
+Shards : stockent les données de façon distribuée.
 
-MongoDB Sharded Cluster : distribution horizontale des données
-
-📁 Structure du projet
-marketplace-distributed-catalog-mongodb_sharded/
-│
-├── consumer/
-│   └── consumer_worker.py        # Traitement des données consommées
-│
-├── producer/
-│   └── (scripts producer)        # Envoi des données vers MongoDB
-│
-├── docker-compose.yml             # Déploiement du cluster MongoDB sharded
-├── listproduit.py                 # Gestion / listing des produits
-├── marketplace_dashboard.py       # Visualisation / dashboard marketplace
-│
-├── olist_order_items_dataset.csv  # Dataset commandes
-├── olist_products_dataset.csv     # Dataset produits
-├── products_with_seller_price.csv # Dataset enrichi
-│
-├── rapport mongodb sharding.pdf   # Rapport explicatif du projet
-├── .gitignore
-└── README.md
-
-📊 Datasets
-
-Les données utilisées proviennent du dataset Olist (e-commerce) :
-
-Produits
-
-Commandes
-
-Prix vendeurs
-
-Données enrichies pour analyse marketplace
-
-Ces datasets permettent de simuler un catalogue réel à grande échelle.
 
 ⚙️ Lancer le projet
 1️⃣ Cloner le dépôt
@@ -89,27 +71,19 @@ cd marketplace-distributed-catalog-mongodb_sharded
 2️⃣ Démarrer le cluster MongoDB sharded
 docker compose up -d
 
-3️⃣ Initialiser le sharding (mongosh)
+3️⃣ Initialiser le sharding
 sh.enableSharding("marketplaceDB")
 sh.shardCollection("marketplaceDB.products", { product_id: "hashed" })
 
 🔄 Pipeline Producer / Consumer
 
-Producer :
+Le Producer envoie les données issues des fichiers CSV.
 
-Lit les fichiers CSV
+Le Consumer traite et insère les données dans MongoDB.
 
-Prépare et envoie les données
+La distribution sur les shards est automatique.
 
-Consumer :
-
-Consomme les données
-
-Insère les documents dans MongoDB sharded
-
-Garantit la distribution sur les shards
-
-📈 Dashboard & Analyse
+📈 Dashboard Marketplace
 
 Le script marketplace_dashboard.py permet :
 
@@ -119,47 +93,28 @@ La visualisation des prix
 
 L’exploration des données marketplace
 
-🧪 Vérification du sharding
-
-Dans mongosh :
-
-sh.status()
-db.products.getShardDistribution()
-
 📄 Rapport
 
-Le fichier rapport mongodb sharding.pdf détaille :
+Le fichier rapport mongodb sharding.pdf explique :
 
 Le concept de sharding
 
-L’architecture choisie
+L’architecture utilisée
 
 Les choix techniques
 
-Les résultats et limites
+Les résultats obtenus
 
 🎯 Compétences mises en valeur
 
-✔ Data Engineering
-✔ Big Data Architecture
-✔ MongoDB Sharding
-✔ Docker
-✔ Python
-✔ Streaming (Producer / Consumer)
+Data Engineering
 
-🤝 Contribution
+Big Data
 
-Les contributions sont les bienvenues :
+MongoDB Sharding
 
-Optimisation du pipeline
+Docker
 
-Ajout de nouveaux dashboards
+Python
 
-Amélioration des performances
-
-📜 Licence
-
-Projet académique / pédagogique — libre d’utilisation à des fins éducatives.
-
-⭐ Si ce projet vous a été utile, n'hésitez pas à lui donner une étoile !
-Développé avec ❤️ dans le cadre d'un cours de Big Data
+Architecture distribuée
