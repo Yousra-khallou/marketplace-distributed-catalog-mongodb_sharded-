@@ -51,3 +51,4 @@ Le système est composé de deux parties principales :
         |               |               |
      Shard 1          Shard 2          Shard 3
    (Replica Set)   (Replica Set)   (Replica Set)
+---
