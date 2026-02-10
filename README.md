@@ -28,12 +28,8 @@ un **cluster MongoDB sharded** pour assurer la scalabilité horizontale.
 
 ---
 
-## 🏗️ Architecture du projet
 
-Le système est composé de deux parties principales :
-1. Un **pipeline de données** (Producer / Consumer)
-2. Un **cluster MongoDB sharded** pour le stockage distribué
-
+```md
 ### Architecture globale
 
 ```text
@@ -51,4 +47,3 @@ Le système est composé de deux parties principales :
         |               |               |
      Shard 1          Shard 2          Shard 3
    (Replica Set)   (Replica Set)   (Replica Set)
----
