@@ -51,3 +51,12 @@ Le système est composé de deux parties principales :
         |               |               |
      Shard 1          Shard 2          Shard 3
    (Replica Set)   (Replica Set)   (Replica Set)
+Explication
+
+Producer : lit les fichiers CSV et envoie les données.
+
+Consumer : traite les données et les insère dans MongoDB.
+
+mongos : route les requêtes vers le bon shard.
+
+Shards : stockent les données de façon distribuée.
